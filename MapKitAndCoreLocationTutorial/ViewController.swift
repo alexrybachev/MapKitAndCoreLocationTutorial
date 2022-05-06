@@ -89,7 +89,26 @@ class ViewController: UIViewController {
     }
     
     @objc fileprivate func getDirectionButtonTapped() {
+        guard let text = textfield.text else { return }
+        showMapRoute = true
+        textfield.endEditing(true)
         
+        let geoCoder = CLGeocoder()
+        geoCoder.geocodeAddressString(text) { placemarks, error in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            
+            guard let placemarks = placemarks,
+                  let placemark = placemarks.first,
+                  let location = placemark.location
+            else { return }
+            
+            let destinationCoordinate = location.coordinate
+            
+            self.mapRoute(destinationCoordinate: destinationCoordinate)
+        }
     }
     
     @objc fileprivate func startStopButtonTapped() {
@@ -146,7 +165,37 @@ class ViewController: UIViewController {
     }
     
     fileprivate func mapRoute(destinationCoordinate: CLLocationCoordinate2D) {
+        guard let sourceCoordinate = locationManager.location?.coordinate else { return }
         
+        let sourcePlacemark = MKPlacemark(coordinate: sourceCoordinate)
+        let destinationPlacemark = MKPlacemark(coordinate: destinationCoordinate)
+        
+        let sourceItem = MKMapItem(placemark: sourcePlacemark)
+        let destinationItem = MKMapItem(placemark: destinationPlacemark)
+        
+        let routeRequest = MKDirections.Request()
+        routeRequest.source = sourceItem
+        routeRequest.destination = destinationItem
+        routeRequest.transportType = .walking
+        
+        let directions = MKDirections(request: routeRequest)
+        
+        directions.calculate { response, error in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            
+            guard let response = response, let route = response.routes.first else { return }
+            
+            self.route = route
+            self.mapView.addOverlay(route.polyline)
+            self.mapView.setVisibleMapRect(route.polyline.boundingMapRect,
+                                           edgePadding: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16),
+                                           animated: true)
+           
+            self.getRouteSteps(route: route)
+        }
     }
     
     fileprivate func getRouteSteps(route: MKRoute) {
@@ -171,5 +220,9 @@ extension ViewController: CLLocationManagerDelegate {
 }
 
 extension ViewController: MKMapViewDelegate {
-    
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        let renderer = MKPolylineRenderer(overlay: overlay)
+        renderer.strokeColor = .blue
+        return renderer
+    }
 }
