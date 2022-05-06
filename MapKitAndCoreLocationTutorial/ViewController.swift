@@ -263,7 +263,7 @@ extension ViewController: CLLocationManagerDelegate {
             let message = "In \(steps[stepCounter].distance) meters \(steps[stepCounter].instructions), then in \(steps[stepCounter + 1].distance) meters \(steps[stepCounter + 1].instructions)"
             directionLabel.text = message
             
-            let speechUtterance = AVSpeechUtterance(string: initialMessage)
+            let speechUtterance = AVSpeechUtterance(string: message)
             speechSynthesizer.speak(speechUtterance)
         } else {
             let message = "You have arrived at your destination"
