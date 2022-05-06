@@ -76,6 +76,8 @@ class ViewController: UIViewController {
     
     lazy var mapView: MKMapView = {
         let mapView = MKMapView()
+        mapView.delegate = self
+        mapView.showsUserLocation = true
         return mapView
     }()
     
@@ -109,7 +111,10 @@ class ViewController: UIViewController {
     }
     
     fileprivate func centerViewToUserLocation(center: CLLocationCoordinate2D) {
-        
+        let region = MKCoordinateRegion(center: center,
+                                        latitudinalMeters: locationDistance,
+                                        longitudinalMeters: locationDistance)
+        mapView.setRegion(region, animated: true)
     }
     
     fileprivate func handleAuthorizationStatus(locationManager: CLLocationManager, status: CLAuthorizationStatus) {
@@ -127,7 +132,9 @@ class ViewController: UIViewController {
             //
             break
         case .authorizedWhenInUse:
-            // TODO:
+            if let center = locationManager.location?.coordinate {
+                centerViewToUserLocation(center: center)
+            }
             break
         case .authorized:
             //
@@ -148,5 +155,9 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: CLLocationManagerDelegate {
+    
+}
+
+extension ViewController: MKMapViewDelegate {
     
 }
