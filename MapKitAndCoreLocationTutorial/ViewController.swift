@@ -199,7 +199,28 @@ class ViewController: UIViewController {
     }
     
     fileprivate func getRouteSteps(route: MKRoute) {
+        for monitoredRegions in locationManager.monitoredRegions {
+            locationManager.stopMonitoring(for: monitoredRegions)
+        }
         
+        let steps = route.steps
+        self.steps = steps
+        
+        for i in 0..<steps.count {
+            let step = steps[i]
+            print(step.instructions)
+            print(step.distance)
+            
+            let region = CLCircularRegion(center: step.polyline.coordinate, radius: 20, identifier: "\(i)")
+            locationManager.startMonitoring(for: region)
+        }
+        
+        stepCounter += 1
+        let initialMessage = "In \(steps[stepCounter].distance) meters \(steps[stepCounter].instructions), then in \(steps[stepCounter + 1].distance) meters \(steps[stepCounter + 1].instructions)"
+        directionLabel.text = initialMessage
+        
+        let speechUtterance = AVSpeechUtterance(string: initialMessage)
+        speechSynthesizer.speak(speechUtterance)
     }
 }
 
