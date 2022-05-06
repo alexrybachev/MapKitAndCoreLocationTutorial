@@ -258,7 +258,26 @@ extension ViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        print("didEnterRegion")
+        stepCounter += 1
+        if stepCounter < steps.count {
+            let message = "In \(steps[stepCounter].distance) meters \(steps[stepCounter].instructions), then in \(steps[stepCounter + 1].distance) meters \(steps[stepCounter + 1].instructions)"
+            directionLabel.text = message
+            
+            let speechUtterance = AVSpeechUtterance(string: initialMessage)
+            speechSynthesizer.speak(speechUtterance)
+        } else {
+            let message = "You have arrived at your destination"
+            directionLabel.text = message
+            stepCounter = 0
+            navigationStarted = false
+            
+            let speechUtterance = AVSpeechUtterance(string: message)
+            speechSynthesizer.speak(speechUtterance)
+            
+            for monitoredRegion in locationManager.monitoredRegions {
+                locationManager.stopMonitoring(for: monitoredRegion)
+            }
+        }
     }
 }
 
