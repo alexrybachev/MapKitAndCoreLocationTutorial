@@ -112,7 +112,25 @@ class ViewController: UIViewController {
     }
     
     @objc fileprivate func startStopButtonTapped() {
+        if !navigationStarted {
+            showMapRoute = true
+            if let location = locationManager.location {
+                let center = location.coordinate
+                centerViewToUserLocation(center: center)
+            }
+        } else {
+            if let route = route {
+                self.mapView.setVisibleMapRect(route.polyline.boundingMapRect,
+                                               edgePadding: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16),
+                                               animated: true)
+                self.steps.removeAll()
+                self.stepCounter = 0
+            }
+        }
         
+        navigationStarted.toggle()
+        
+        startStopButton.setTitle(navigationStarted ? "Stop Navigation" : "Start Navigation", for: .normal)
     }
     
     fileprivate func setupViews() {
@@ -237,6 +255,10 @@ extension ViewController: CLLocationManagerDelegate {
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         handleAuthorizationStatus(locationManager: manager, status: CLLocationManager.authorizationStatus())
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+        print("didEnterRegion")
     }
 }
 
