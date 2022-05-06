@@ -156,6 +156,18 @@ class ViewController: UIViewController {
 
 extension ViewController: CLLocationManagerDelegate {
     
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if !showMapRoute {
+            if let location = locations.last {
+                let center = location.coordinate
+                centerViewToUserLocation(center: center)
+            }
+        }
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        handleAuthorizationStatus(locationManager: manager, status: CLLocationManager.authorizationStatus())
+    }
 }
 
 extension ViewController: MKMapViewDelegate {
