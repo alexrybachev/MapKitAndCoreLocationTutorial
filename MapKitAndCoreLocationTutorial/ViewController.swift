@@ -5,10 +5,6 @@
 //  Created by Aleksandr Rybachev on 06.05.2022.
 //
 
-/*
- Проект сделан по уроку https://youtu.be/5fWG5ofhHsY
- */
-
 import UIKit
 import MapKit
 import CoreLocation
